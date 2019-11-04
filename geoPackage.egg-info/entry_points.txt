@@ -1,0 +1,3 @@
+[console_scripts]
+geoPackage = geoPackage.main:main
+

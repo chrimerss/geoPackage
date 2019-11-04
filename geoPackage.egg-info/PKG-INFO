@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: geoPackage
+Version: 0.1
+Summary: UNKNOWN
+Home-page: UNKNOWN
+Author: Allen Li
+Author-email: chrimerss@gmail.com
+License: License :: OSI Approved :: MIT License
+Description: # geoPackage
+        This package used for manipulating geo-data to alleviate personal research
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
