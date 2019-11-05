@@ -18,6 +18,7 @@ def layout(src, *arg, **kargs):
     :src - geoPackage.io.Raster object
     :kargs - {'cmap': plt.cm.colorbar object,
               'location': location of colorbar right/bottom,
+              'remove_neg': bool; don't display negative values
               'cb_label': label of colorbar,
               'extent': base map extent 'global'/'local',
               'save': save path}
@@ -31,6 +32,7 @@ def layout(src, *arg, **kargs):
     cb_label= kargs.get('cb_label', '')
     extent= kargs.get('extent', 'global')
     dst= kargs.get('save', None)
+    remove= kargs.get('remove_neg', True)
     figkargs= {key: kargs[key] for key in kargs.keys() if key in ['figsize', 'dpi']}
     meshplotkargs= {key: kargs[key] for key in kargs.keys() if key in ['vmin', 'vmax']}
 
@@ -46,8 +48,11 @@ def layout(src, *arg, **kargs):
     lons= np.linspace(xmin, xmax, n)
     lats= np.linspace(ymin, ymax, m)
     x,y = np.meshgrid(lons, lats)
+    data= src.array
+    if remove:
+        data[data<0]= np.nan
     # print(xmin, xmax, ymin, ymax)
-    
+
     if extent=='global':
         map_extent= (-180, 180, -90, 90)
     else:
@@ -55,15 +60,15 @@ def layout(src, *arg, **kargs):
 
     fig= plt.figure(**figkargs)
     m = Basemap(projection='cyl', resolution='l',
-                llcrnrlat=map_extent[2], urcrnrlat=map_extent[3],
+                llcrnrlat=map_extent[3], urcrnrlat=map_extent[2],
                 llcrnrlon=map_extent[0], urcrnrlon=map_extent[1])
     m.drawcoastlines(linewidth=0.5)
     m.drawparallels(np.arange(-90, 91, 45), labels=[True,False,False,True], dashes=[10,10], linewidth=.5)
     m.drawmeridians(np.arange(-180, 180, 45), labels=[True,False,False,True], dashes=[10,10], linewidth=.5)
     # cmap= plt.get_cmap('rainbow') if cmap is None else plt.get_cmap(cmap)
     x,y = m(x,y)
-    map = m.pcolormesh(x,y, src.array, cmap=cmap, **meshplotkargs)
-    cb = m.colorbar(location=loc, pad='10%')    
+    map = m.pcolormesh(x,y, data, cmap=cmap, **meshplotkargs)
+    cb = m.colorbar(location=loc, pad='10%')
     cb.set_label(cb_label)
     if dst is not None:
         fig.savefig(dst)
@@ -76,7 +81,7 @@ def taylorPlot(*args, **kargs):
     Inputs:
     ------------------------
     :args
-        data=arg[0] 
+        data=arg[0]
         example
             [
                 [std, cc, name]

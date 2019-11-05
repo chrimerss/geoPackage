@@ -27,20 +27,20 @@ class Geoprocess(object):
             dst= 'temp/temp_file.tif'
         self._validateType(self.raster, 'raster')
         xmin, xmax, ymin, ymax= extent
-        ds= gdal.Translate(dst, self.raster.filename, projWin=[xmin, ymin, xmax, ymax], noData=nodata)
+        ds= gdal.Translate(dst, self.raster.filename, projWin=[xmin, ymin, xmax, ymax], noData=nodata, outputSRS= self.raster.geotransform)
         rasterCroped= ReadFile(dst).raster
         if os.path.exists('temp/temp_file.tif'):
             os.system('rm -r temp')
 
         return rasterCroped
-        
-        
+
+
     def rasterClipByMask(self, mask, dst=None, nodata=-9999):
         '''
         Inputs:
         -----------------
         :mask - geopandas object
-        :dst - 
+        :dst -
 
         Output:
         -----------------
@@ -80,6 +80,38 @@ class Geoprocess(object):
             values['sample']= self._pointsampling(self.raster, x, y)
 
         return values
+
+    #TODO
+    def reshape(self, shape, dst=None, method='bilinear', proj='WGS84', noData=-9999):
+        '''
+        Inputs:
+        ------------------
+        :shape - tuple or list; (rows, cols)
+        :method - str; ['bilinear' 'nearest', 'cubic', 'cubicspline', 'lanczos', 'average', 'mode']
+        :dst - str; output file path
+        :proj - str; projection
+        :noData - int; 
+
+        Outputs:
+        ------------------
+        :rasterReshaped - geoPackage.io.Raster object
+        '''
+        Xori, Xres, Xskew, Yori, Yskew, Yres= self.raster.geotransform
+        rows, cols= self.raster.array
+        Xfac, Yfac= cols/shape[1], rows/shape[0]
+        rasterXres= Xres*Xfac
+        rasterYres= Yres*Yfac
+        if dst is None:
+            if not os.path.exists('temp'): os.mkdir('temp')
+            dst= 'temp/temp_file.tif'
+        cmd= 'gdal_translate -ot Float32 -of GTIFF -a_sts %s -a_nodata %s -tr %s %s -r %s COMPRESS=Deflate %s'\
+            %(proj, str(noData), rasterXres, rasterYres, method, dst)
+        os.system(cmd)
+        if os.path.exists('temp/temp_file.tif'):
+            os.system('rm -r temp')
+        rasterReshaped= ReadFile(dst).raster
+
+        return rasterReshaped
 
 
 
