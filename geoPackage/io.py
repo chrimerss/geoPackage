@@ -16,7 +16,7 @@ class ReadFile:
             self.vector= Vector(filename)
 
 
-class Raster:
+class Raster():
     def __init__(self, filename):
         self.filename= filename
         self.layer= gdal.Open(filename)

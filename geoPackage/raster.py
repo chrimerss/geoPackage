@@ -71,13 +71,17 @@ class Geoprocess(object):
         self._validateType(geopnts, 'vector')
         geotrans= self.raster.geotransform
         forward_transform= Affine.from_gdal(*geotrans)
-        values= {}
+        values= {'lats': [],
+                'lons': [],
+                'samples': []}
         for i in range(len(geopnts.layer)):
-            res = ~forward_transform* np.array(geopnts.layer.geometry[i])
+            # print(np.array(geopnts.layer.geometry[i]).squeeze())
+            geometry= np.array(geopnts.layer.geometry[i]).squeeze()
+            res = ~forward_transform* geometry
             x,y = int(res[0]), int(res[1])
-            values['lat']= np.array(geopnts.layer.geometry[i])[0]
-            values['lon']= np.array(geopnts.layer.geometry[i])[1]
-            values['sample']= self._pointsampling(self.raster, x, y)
+            values['lats'].append(geometry[0])
+            values['lons'].append(geometry[1])
+            values['samples'].append(self._pointsampling(self.raster, x, y))
 
         return values
 

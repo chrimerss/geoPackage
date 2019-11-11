@@ -1,5 +1,7 @@
 # geoPackage
 
+[![BCH compliance](https://bettercodehub.com/edge/badge/chrimerss/geoPackage?branch=master)](https://bettercodehub.com/)
+
 This python package used for geo-data manipulation based on the backend of gdal.
 
 ## Getting Started
